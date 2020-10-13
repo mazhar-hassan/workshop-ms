@@ -1,5 +1,6 @@
 package com.ptv.livebox.movie.controller;
 
+import com.github.fge.jsonpatch.JsonPatch;
 import com.ptv.livebox.movie.api.MovieApi;
 import com.ptv.livebox.movie.dto.Movie;
 import com.ptv.livebox.movie.service.MovieService;
@@ -31,6 +32,11 @@ public class MovieController implements MovieApi {
     public Movie edit(Integer id, Movie movie) {
         movie.setId(id);
         return movieService.edit(movie);
+    }
+
+    @Override
+    public Movie patch(Integer id, JsonPatch patch) {
+        return movieService.patch(id, patch);
     }
 
     @Override

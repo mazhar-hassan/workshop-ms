@@ -13,13 +13,13 @@ public interface MovieApi {
     @PostMapping
     Movie create(@RequestBody Movie movie);
 
-    @PutMapping
-    Movie edit(@RequestBody Movie movie);
+    @PutMapping("/{id}")
+    Movie edit(@PathVariable("id") Integer id, @RequestBody Movie movie);
 
     @DeleteMapping("/{id}")
     void delete(@PathVariable("id") Integer id);
 
-    @GetMapping("/")
+    @GetMapping
     List<Movie> list();
 
 

@@ -28,7 +28,8 @@ public class MovieController implements MovieApi {
     }
 
     @Override
-    public Movie edit(Movie movie) {
+    public Movie edit(Integer id, Movie movie) {
+        movie.setId(id);
         return movieService.edit(movie);
     }
 

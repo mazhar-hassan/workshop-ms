@@ -7,6 +7,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.ptv.livebox.movie.dao.MovieRepository;
 import com.ptv.livebox.movie.dao.entity.MovieEntity;
+import com.ptv.livebox.movie.dto.MovieDetail;
 import com.ptv.livebox.movie.dto.Movie;
 import com.ptv.livebox.movie.mapper.MovieMapper;
 import com.ptv.livebox.movie.service.MovieService;
@@ -35,7 +36,7 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public Movie create(Movie movie) {
+    public Movie create(MovieDetail movie) {
         MovieEntity entity = movieMapper.map(movie);
         movieRepository.save(entity);
 
@@ -43,8 +44,9 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public Movie edit(Movie movie) {
+    public Movie edit(Integer id, MovieDetail movie) {
         MovieEntity entity = movieMapper.map(movie);
+        entity.setId(id);
         movieRepository.save(entity);
 
         return movieMapper.map(entity);

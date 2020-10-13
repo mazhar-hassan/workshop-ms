@@ -2,6 +2,7 @@ package com.ptv.livebox.movie.controller;
 
 import com.github.fge.jsonpatch.JsonPatch;
 import com.ptv.livebox.movie.api.MovieApi;
+import com.ptv.livebox.movie.dto.MovieDetail;
 import com.ptv.livebox.movie.dto.Movie;
 import com.ptv.livebox.movie.service.MovieService;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,14 +25,13 @@ public class MovieController implements MovieApi {
     }
 
     @Override
-    public Movie create(Movie movie) {
+    public Movie create(MovieDetail movie) {
         return movieService.create(movie);
     }
 
     @Override
-    public Movie edit(Integer id, Movie movie) {
-        movie.setId(id);
-        return movieService.edit(movie);
+    public Movie edit(Integer id, MovieDetail movie) {
+        return movieService.edit(id, movie);
     }
 
     @Override

@@ -1,10 +1,7 @@
 package com.ptv.livebox.movie.dto;
 
-public class Movie {
+public class Movie extends MovieDetail {
     private Integer id;
-    private String title;
-    private MovieGenera genera;
-    private String description;
 
     public Integer getId() {
         return id;
@@ -12,29 +9,5 @@ public class Movie {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public MovieGenera getGenera() {
-        return genera;
-    }
-
-    public void setGenera(MovieGenera genera) {
-        this.genera = genera;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
+import com.ptv.livebox.movie.common.exceptions.RecordNotFoundException;
 import com.ptv.livebox.movie.dao.MovieRepository;
 import com.ptv.livebox.movie.dao.entity.MovieEntity;
 import com.ptv.livebox.movie.dto.MovieDetail;
@@ -27,12 +28,10 @@ public class MovieServiceImpl implements MovieService {
         this.movieMapper = movieMapper;
     }
 
-
     @Override
     public Movie findById(Integer id) {
 
-        return movieMapper.map(movieRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Record not found")));
+        return movieMapper.map(fetchMovie(id));
     }
 
     @Override
@@ -45,19 +44,17 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public Movie edit(Integer id, MovieDetail movie) {
-        MovieEntity entity = movieMapper.map(movie);
-        entity.setId(id);
-        movieRepository.save(entity);
+        MovieEntity existing = fetchMovie(id);
+        movieMapper.mapOnTo(movie, existing);
+        movieRepository.save(existing);
 
-        return movieMapper.map(entity);
+        return movieMapper.map(existing);
     }
 
     @Override
     public void delete(Integer id) {
-        MovieEntity movie = movieRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Record not found"));
 
-        movieRepository.delete(movie);
+        movieRepository.delete(fetchMovie(id));
     }
 
     @Override
@@ -69,8 +66,7 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public Movie patch(Integer id, JsonPatch patch) {
-        MovieEntity movie = movieRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Record not found"));
+        MovieEntity movie = fetchMovie(id);
 
         MovieEntity patched = null;
         try {
@@ -89,5 +85,10 @@ public class MovieServiceImpl implements MovieService {
         JsonNode patched = patch.apply(objectMapper.convertValue(movie, JsonNode.class));
 
         return objectMapper.treeToValue(patched, MovieEntity.class);
+    }
+
+    private MovieEntity fetchMovie(Integer id) {
+        return movieRepository.findById(id)
+                .orElseThrow(() -> new RecordNotFoundException("Movie not found"));
     }
 }

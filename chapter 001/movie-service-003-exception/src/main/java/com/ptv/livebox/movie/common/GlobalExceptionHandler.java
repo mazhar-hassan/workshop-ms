@@ -5,6 +5,7 @@ import com.ptv.livebox.movie.common.exceptions.ExceptionResponse;
 import com.ptv.livebox.movie.common.exceptions.RecordNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,10 +26,12 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ExceptionResponse> handleAllExceptions(Exception exception) {
         if (exception instanceof ApplicationException) {
             return handleApplicationException((ApplicationException) exception);
+        } else if (exception instanceof HttpMessageNotReadableException) {
+            return new ResponseEntity<>(ExceptionResponse.of(ApplicationException.ERROR_UNABLE_TO_MAP_OBJECT, "Parser error, please make sure JSON is properly formatted"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         //log.error("System exception occurred", exception);
-
+        exception.printStackTrace();
         return new ResponseEntity<>(ExceptionResponse.of(ApplicationException.ERROR_UNKNOWN_ERROR, "Unknown error occured please contact site admin"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

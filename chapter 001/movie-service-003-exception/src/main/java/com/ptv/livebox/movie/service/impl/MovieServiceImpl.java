@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
+import com.ptv.livebox.movie.common.exceptions.MissingRequiredFieldException;
 import com.ptv.livebox.movie.common.exceptions.RecordNotFoundException;
 import com.ptv.livebox.movie.dao.MovieRepository;
 import com.ptv.livebox.movie.dao.entity.MovieEntity;
@@ -36,6 +37,7 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public Movie create(MovieDetail movie) {
+        validate(movie);
         MovieEntity entity = movieMapper.map(movie);
         movieRepository.save(entity);
 
@@ -44,6 +46,7 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public Movie edit(Integer id, MovieDetail movie) {
+        validate(movie);
         MovieEntity existing = fetchMovie(id);
         movieMapper.mapOnTo(movie, existing);
         movieRepository.save(existing);
@@ -90,5 +93,15 @@ public class MovieServiceImpl implements MovieService {
     private MovieEntity fetchMovie(Integer id) {
         return movieRepository.findById(id)
                 .orElseThrow(() -> new RecordNotFoundException("Movie not found"));
+    }
+
+    private void validate(MovieDetail movie) {
+        if (movie == null) {
+            throw new MissingRequiredFieldException("Required movie object is null");
+        } else if (movie.getTitle() == null || movie.getTitle().isEmpty()) {
+            throw new MissingRequiredFieldException("Movie title is missing");
+        } else if (movie.getGenera() == null) {
+            throw new MissingRequiredFieldException("Movie genera is missing");
+        }
     }
 }

@@ -4,20 +4,28 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 
 public class PTVUserDetails implements UserDetails {
 
     private final UserEntity user;
+    private final List<UserRoleEntity> roles;
 
-    public PTVUserDetails(UserEntity user) {
+    public PTVUserDetails(UserEntity user, List<UserRoleEntity> roles) {
         this.user = user;
+        this.roles = roles;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority("USER"));
+        if (null == roles) {
+            return Collections.emptySet();
+        }
+
+        Set<SimpleGrantedAuthority> grantedAuthorities = new HashSet<>();
+        roles.forEach(role -> grantedAuthorities.add(new SimpleGrantedAuthority(role.getRoleName())));
+
+        return grantedAuthorities;
     }
 
     @Override

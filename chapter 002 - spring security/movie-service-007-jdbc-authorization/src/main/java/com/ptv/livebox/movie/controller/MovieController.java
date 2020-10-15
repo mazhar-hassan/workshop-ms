@@ -5,6 +5,7 @@ import com.ptv.livebox.movie.api.MovieApi;
 import com.ptv.livebox.movie.dto.Movie;
 import com.ptv.livebox.movie.dto.MovieDetail;
 import com.ptv.livebox.movie.service.MovieService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,11 +20,13 @@ public class MovieController implements MovieApi {
         this.movieService = movieService;
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
     @Override
     public Movie findById(Integer id) {
         return movieService.findById(id);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Override
     public Movie create(MovieDetail movie) {
         return movieService.create(movie);

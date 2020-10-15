@@ -13,7 +13,7 @@ CREATE TABLE users (
 
 CREATE TABLE user_roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) NOT NULL UNIQUE,
+    username VARCHAR(255) NOT NULL,
     role_name VARCHAR(255) NOT NULL,
     CONSTRAINT user_roles_fk FOREIGN KEY (username) REFERENCES users(username),
     UNIQUE(username, role_name)

@@ -10,6 +10,8 @@ public class ApplicationException extends RuntimeException {
     public static final int ERROR_RECORD_NOT_ACCESSIBLE = 1006;
     public static final int ERROR_UNABLE_TO_MAP_OBJECT = 1007;
     public static final int ERROR_REFLECTION_FAILED_TO_ACCESS_SETTER = 1008;
+    public static final int ERROR_ACCESS_DENIED = 1009;
+    public static final int ERROR_ACCESS_FORBIDDEN = 1010;
 
 
     private final int errorCode;

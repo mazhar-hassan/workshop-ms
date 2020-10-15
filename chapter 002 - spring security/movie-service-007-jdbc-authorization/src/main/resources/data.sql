@@ -13,4 +13,5 @@ INSERT INTO users(id, username, password) VALUES
 
 INSERT INTO user_roles(id, username, role_name) VALUES
 (1, 'batman', 'USER'),
-(2, 'superman', 'ADMIN');
+(2, 'superman', 'ADMIN'),
+(3, 'superman', 'USER');

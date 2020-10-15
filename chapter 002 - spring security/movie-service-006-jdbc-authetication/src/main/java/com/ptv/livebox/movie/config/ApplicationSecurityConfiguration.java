@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 
 @Configuration
@@ -22,7 +23,7 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailService);
-        authenticationProvider.setPasswordEncoder(NoOpPasswordEncoder.getInstance());
+        authenticationProvider.setPasswordEncoder(new BCryptPasswordEncoder(12));
 
         return authenticationProvider;
     }

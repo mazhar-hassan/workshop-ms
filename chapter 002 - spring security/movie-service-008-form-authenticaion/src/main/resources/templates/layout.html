@@ -1,0 +1,53 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4" lang="en">
+<head th:fragment="head-fragment">
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <title layout:title-pattern="$LAYOUT_TITLE | $CONTENT_TITLE">Movies Services - MS Workshop</title>
+    <style>
+        html, body, .page-layout {
+            height:100%;
+        }
+        .header {
+            background-color:#e8e8e8;
+        }
+        .footer {
+            background-color:#efefef;
+        }
+        .page-layout {
+            width:80%;
+            align:center;
+        }
+    </style>
+</head>
+<body>
+<table class="page-layout">
+    <tr class="header">
+        <td>
+            <a th:href="@{/}">Movies Home</a>
+        </td>
+        <td align="right">
+            <div sec:authorize="isAnonymous()">
+                <a th:href="@{/login}">Login</a>
+            </div>
+            <div sec:authorize="isAuthenticated()">
+                <a th:href="@{/logout}">Logout</a>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <main role="main">
+                <div layout:fragment="content"></div>
+            </main>
+        </td>
+    </tr>
+    <tr class="footer">
+        <td colspan="2">
+            <p>Copyright 2020 - Microservices workshop</p>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

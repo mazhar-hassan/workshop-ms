@@ -1,4 +1,4 @@
-package com.ptv.livebox.authentication;
+package com.ptv.livebox.authentication.contoller;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;

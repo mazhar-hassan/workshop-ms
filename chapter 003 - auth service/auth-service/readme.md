@@ -35,3 +35,6 @@ pk12 support both key and certificate to be imported in
 `
 p12.keystore.password=${keystorePassword:mazhar}
 p12.keystore.alias=${keystoreAlias:expertwall}`
+
+# 2. Security - Important entities
+![Security - entities](spring-security-m2h.png)

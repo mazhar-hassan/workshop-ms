@@ -1,8 +1,8 @@
 package com.ptv.livebox.movie.common;
 
-import com.ptv.livebox.movie.common.exceptions.ApplicationException;
-import com.ptv.livebox.movie.common.exceptions.ExceptionResponse;
-import com.ptv.livebox.movie.common.exceptions.RecordNotFoundException;
+import com.o4.microservices.common.exceptions.ApplicationException;
+import com.o4.microservices.common.exceptions.ExceptionResponse;
+import com.o4.microservices.common.exceptions.RecordNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;

@@ -1,4 +1,4 @@
-package com.ptv.livebox.movie.common.exceptions;
+package com.o4.microservices.common.exceptions;
 
 public class RecordNotFoundException extends ApplicationException {
     public RecordNotFoundException(String message) {

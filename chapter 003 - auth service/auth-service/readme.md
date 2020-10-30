@@ -38,3 +38,39 @@ p12.keystore.alias=${keystoreAlias:expertwall}`
 
 # 2. Security - Important entities
 ![Security - entities](spring-security-m2h.png)
+
+
+#3. JWT
+`
+> Java object -> JSON String -> Base64 encode
+>
+> Java object -> JSON String -> encrypt with private key -> Base64 encode
+
+{
+	"alg":"RS512"
+}
+.
+{
+	"sub":	{
+		"id":1,
+		"username":"batman",
+		"roles":[
+			{"id":1,"roleName":"USER"}
+		]
+	},
+	"exp":1603509231
+}
+.
+RSASHA512(
+  base64UrlEncode(header) + "." +
+  base64UrlEncode(payload),
+  privateKey
+)
+
+--------------------- or -----------------------------
+
+HMAC-SHA256(
+ base64urlEncoding(header) + '.'+ base64urlEncoding(payload),
+ secret_salt
+)
+`

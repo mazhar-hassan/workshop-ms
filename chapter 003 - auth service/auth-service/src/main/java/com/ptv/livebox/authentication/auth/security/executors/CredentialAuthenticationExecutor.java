@@ -7,6 +7,7 @@ import com.ptv.livebox.authentication.auth.security.SystemSettings;
 import com.ptv.livebox.authentication.auth.security.token.SystemAccessToken;
 import com.ptv.livebox.authentication.auth.security.token.SystemCredentialsToken;
 import com.ptv.livebox.authentication.auth.security.utils.AuthResponseWriter;
+import com.ptv.livebox.authentication.config.ApplicationSecurityConfiguration;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.slf4j.Logger;
@@ -53,7 +54,7 @@ public class CredentialAuthenticationExecutor implements AuthExecutor {
 
         ApplicationSession session = ((SystemAccessToken) auth).getUser();
 
-        String jwtToken = createJWT(session);
+        String jwtToken = createJWTAsymmetric(session);
 
         AuthResponseWriter.writeSuccess(jwtToken, auth, httpRequest, httpResponse);
     }
@@ -66,5 +67,15 @@ public class CredentialAuthenticationExecutor implements AuthExecutor {
         return Jwts.builder().setSubject(mapper.writeValueAsString(session))
                 .setExpiration(Date.from(expirationTimeUTC.toInstant()))
                 .signWith(SignatureAlgorithm.HS256, settings.getJwtSecretKey()).compact();
+    }
+
+    protected String createJWTAsymmetric(ApplicationSession session) throws IOException {
+        ZonedDateTime expirationTimeUTC =
+                ZonedDateTime.now(ZoneOffset.UTC).plus(settings.getJwtExpiration(), ChronoUnit.MILLIS);
+        ObjectMapper mapper = new ObjectMapper();
+
+        return Jwts.builder().setSubject(mapper.writeValueAsString(session))
+                .setExpiration(Date.from(expirationTimeUTC.toInstant()))
+                .signWith(SignatureAlgorithm.RS512, ApplicationSecurityConfiguration.keypair.getPrivate()).compact();
     }
 }

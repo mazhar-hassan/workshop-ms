@@ -1,22 +1,24 @@
 package com.ptv.livebox.authentication.auth.security;
 
+import com.ptv.livebox.authentication.auth.security.executors.CredentialAuthenticationExecutor;
+import com.ptv.livebox.authentication.auth.security.executors.TokenAuthenticationExecutor;
 import com.ptv.livebox.authentication.auth.security.utils.AuthResponseWriter;
 import com.ptv.livebox.authentication.auth.security.utils.HTTPUtils;
 import com.ptv.livebox.authentication.auth.security.utils.RequestMatcher;
-import com.ptv.livebox.authentication.auth.security.executors.CredentialAuthenticationExecutor;
-import com.ptv.livebox.authentication.auth.security.executors.TokenAuthenticationExecutor;
 import org.hibernate.exception.GenericJDBCException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.*;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class AuthFilter extends GenericFilter {
+public class AuthFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthFilter.class);
 
@@ -27,9 +29,9 @@ public class AuthFilter extends GenericFilter {
         credentialAuthenticationExecutor = new CredentialAuthenticationExecutor(authenticationManager, systemSettings);
         tokenAuthenticationExecutor = new TokenAuthenticationExecutor(authenticationManager);
     }
-
+    
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 

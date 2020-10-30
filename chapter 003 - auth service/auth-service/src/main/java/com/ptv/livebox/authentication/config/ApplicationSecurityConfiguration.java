@@ -6,6 +6,7 @@ import com.ptv.livebox.authentication.auth.security.SystemSettings;
 import com.ptv.livebox.authentication.auth.security.provider.CredentialsAuthenticationProvider;
 import com.ptv.livebox.authentication.auth.security.provider.TokenAuthProvider;
 import com.ptv.livebox.authentication.auth.security.utils.SecurityUtils;
+import com.ptv.livebox.authentication.sec.AbstractSecurityConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,22 +42,9 @@ import static com.ptv.livebox.authentication.auth.security.ApplicationSession.DE
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @Order(1)
-public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapter {
-    public static final int SECURITY_ERROR_EMPTY_TOKEN = 40001;
-    public static final int SECURITY_ERROR_MALFORMED_TOKEN = 40002;
-    public static final int SECURITY_ERROR_EXPIRED_TOKEN = 40003;
-    public static final int SECURITY_ERROR_TOKEN_UNMARSHAL_EXCEPTION = 40004;
-    public static final int SECURITY_ERROR_BAD_CREDENTIALS = 40005;
-    public static final int SECURITY_ERROR_INVALID_CREDENTIALS_SCHEME = 40006;
+public class ApplicationSecurityConfiguration extends AbstractSecurityConfig {
 
-    private static final Logger logger = LoggerFactory.getLogger(TokenAuthProvider.class);
-
-    public static KeyPair keypair = null;
-
-    public static final String TOKEN_PREFIX = "Bearer ";
-    public static final String HEADER_SECURITY_TOKEN = "Authorization";
-    public static final String URL_AUTH = "/auth/login";
-    public static final String URL_AUTH_COOKIE = "/auth/cookie";
+    private static final Logger logger = LoggerFactory.getLogger(ApplicationSecurityConfiguration.class);
 
     @Autowired
     private UserAuthenticationService userDetailService;
@@ -84,17 +72,14 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        /* X- Frame issue */
-        http
-                .headers()
-                .frameOptions().disable();
+
+        SecurityConfiguration.create(http)
+                .disableFrameOptions()
+                .disableCsrf()
+                .disableSession();
+
         /* Configure url mappings */
         http
-                .csrf()
-                .disable()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
                 .authorizeRequests()
                 .antMatchers("/api/**")
                 .hasAnyRole(DEFAULT_ROLE)
@@ -111,7 +96,8 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
                 .httpBasic();
 
         /* Configure Security Filter - A life changer */
-        http.addFilterBefore(getFilter(), BasicAuthenticationFilter.class);
+        setAuthFilter(http, getFilter());
+
 
         File file = ResourceUtils.getFile("classpath:ms-workshop-PKCS-12.p12");
         loadKeys(file, settings.getKeystoreAlias(), settings.getKeystorePassword());
@@ -120,36 +106,6 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("*"));
-        configuration.setAllowedMethods(List.of("*"));
-        configuration.setAllowCredentials(true);
-        List<String> allowedHeaders = new ArrayList<>();
-        allowedHeaders.add(HEADER_SECURITY_TOKEN);
-        allowedHeaders.add("auth-type");
-        allowedHeaders.add("Access-Control-Expose-Headers");
-        configuration.setAllowedHeaders(allowedHeaders);
-        configuration.setAllowedHeaders(List.of("*"));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-
-        return source;
-    }
-
-
-    private static void loadKeys(File resourceFile, String alias, String password) {
-        if (keypair == null) {
-            try {
-                keypair = SecurityUtils.loadFromPKCS12(alias, resourceFile, password.toCharArray());
-            } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | UnrecoverableEntryException
-                    | IOException e) {
-                logger.error("***************************************************************************");
-                logger.error("***************************************************************************");
-                logger.error("Bad Error: System not able to load keystore hence cannot continue ");
-                logger.error("Exception in loading keystore", e);
-                System.exit(-1);
-
-            }
-        }
+        return getCorsConfiguration();
     }
 }

@@ -34,7 +34,7 @@ public class TestMovieController {
 
 
     @Test
-    public void testGetAllTodosShouldReturnDataFromClient() throws Exception {
+    public void testFindById() throws Exception {
 
         Mockito.when(reviewsApi.findReviewsByMovieId(1)).thenReturn(getMockingReviews());
 

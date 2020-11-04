@@ -1,9 +1,9 @@
 package com.ptv.livebox.movie.controller;
 
 import com.github.fge.jsonpatch.JsonPatch;
-import com.ptv.livebox.movie.api.MovieApi;
-import com.ptv.livebox.movie.dto.Movie;
-import com.ptv.livebox.movie.dto.MovieDetail;
+import com.ptv.livebox.common.api.movies.MovieApi;
+import com.ptv.livebox.common.api.movies.dtos.Movie;
+import com.ptv.livebox.common.api.movies.dtos.MovieDetail;
 import com.ptv.livebox.movie.service.MovieService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

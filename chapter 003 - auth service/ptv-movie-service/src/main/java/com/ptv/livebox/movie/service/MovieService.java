@@ -1,8 +1,8 @@
 package com.ptv.livebox.movie.service;
 
 import com.github.fge.jsonpatch.JsonPatch;
-import com.ptv.livebox.movie.dto.MovieDetail;
-import com.ptv.livebox.movie.dto.Movie;
+import com.ptv.livebox.common.api.movies.dtos.Movie;
+import com.ptv.livebox.common.api.movies.dtos.MovieDetail;
 
 import java.util.List;
 

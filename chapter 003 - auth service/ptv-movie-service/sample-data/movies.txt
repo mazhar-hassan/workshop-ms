@@ -1,0 +1,11 @@
+INSERT INTO tv_movies VALUES
+(1,"Ronnin", "ACTION", "Ronnin is an ACTION movie about retired agents from world-leading secret agencies got together"),
+(2,"Black Panther 2018","ACTION",""),
+(3,"Avenegers Endgame 2019","ACTION",""),
+(4,"Mission impossible - fallout 2018","ACTION",""),
+(5,"Mad Max - Fury Road 2015","ACTION",""),
+(6,"Spider Man 2018","ACTION","Marvel movie"),
+(7,"Dunkirk 2017","ACTION","War movies"),
+(8,"Thor: Ragnarok 2017","ACTION","Marvel Movie"),
+(9,"Logan 2017","ACTION","X Men movie")
+;

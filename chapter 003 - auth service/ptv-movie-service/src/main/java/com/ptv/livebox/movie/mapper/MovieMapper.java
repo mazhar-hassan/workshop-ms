@@ -1,8 +1,8 @@
 package com.ptv.livebox.movie.mapper;
 
+import com.ptv.livebox.common.api.movies.dtos.Movie;
+import com.ptv.livebox.common.api.movies.dtos.MovieDetail;
 import com.ptv.livebox.movie.dao.entity.MovieEntity;
-import com.ptv.livebox.movie.dto.Movie;
-import com.ptv.livebox.movie.dto.MovieDetail;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 

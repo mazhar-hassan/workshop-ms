@@ -1,16 +1,15 @@
 package com.ptv.livebox.movie.dao.entity;
 
-import com.ptv.livebox.movie.dto.MovieGenera;
+import com.ptv.livebox.common.api.movies.dtos.MovieGenera;
 
 import javax.persistence.*;
 
-@Entity(name = "movies")
+@Entity(name = "tv_movies")
 public class MovieEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String title;
-
     @Enumerated(EnumType.STRING)
     private MovieGenera genera;
     private String description;

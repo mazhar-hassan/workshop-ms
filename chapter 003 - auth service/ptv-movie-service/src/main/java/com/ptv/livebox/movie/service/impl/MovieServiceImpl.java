@@ -7,12 +7,14 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.o4.microservices.common.exceptions.MissingRequiredFieldException;
 import com.o4.microservices.common.exceptions.RecordNotFoundException;
+import com.ptv.livebox.common.api.movies.dtos.Movie;
+import com.ptv.livebox.common.api.movies.dtos.MovieDetail;
+import com.ptv.livebox.common.api.reviews.ReviewsApi;
 import com.ptv.livebox.movie.dao.MovieRepository;
 import com.ptv.livebox.movie.dao.entity.MovieEntity;
-import com.ptv.livebox.movie.dto.Movie;
-import com.ptv.livebox.movie.dto.MovieDetail;
 import com.ptv.livebox.movie.mapper.MovieMapper;
 import com.ptv.livebox.movie.service.MovieService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,8 +22,11 @@ import java.util.List;
 @Service
 public class MovieServiceImpl implements MovieService {
 
+    @Autowired
+    ReviewsApi reviewsApi;
     private final MovieRepository movieRepository;
     private final MovieMapper movieMapper;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public MovieServiceImpl(MovieRepository movieRepository, MovieMapper movieMapper) {
@@ -31,8 +36,9 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public Movie findById(Integer id) {
-
-        return movieMapper.map(fetchMovie(id));
+        Movie movie = movieMapper.map(fetchMovie(id));
+        movie.setReviews(reviewsApi.findReviewsByMovieId(id));
+        return movie;
     }
 
     @Override

@@ -4,10 +4,9 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.ptv.livebox.common.api.movies.MovieApi;
 import com.ptv.livebox.common.api.movies.dtos.Movie;
 import com.ptv.livebox.common.api.movies.dtos.MovieDetail;
+import com.ptv.livebox.movie.dto.MovieSearchRequest;
 import com.ptv.livebox.movie.service.MovieService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -53,5 +52,10 @@ public class MovieController implements MovieApi {
     @GetMapping("/admin")
     public String fakeAdminEndpoint() {
         return "Hello from Admin";
+    }
+
+    @PostMapping("/search")
+    public List<Movie> search(@RequestBody MovieSearchRequest request) {
+        return movieService.search(request);
     }
 }

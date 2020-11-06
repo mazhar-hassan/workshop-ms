@@ -11,10 +11,15 @@ import com.ptv.livebox.common.api.movies.dtos.Movie;
 import com.ptv.livebox.common.api.movies.dtos.MovieDetail;
 import com.ptv.livebox.common.api.reviews.ReviewsApi;
 import com.ptv.livebox.movie.dao.MovieRepository;
+import com.ptv.livebox.movie.dao.MovieSpecifications;
 import com.ptv.livebox.movie.dao.entity.MovieEntity;
+import com.ptv.livebox.movie.dto.MovieSearchRequest;
 import com.ptv.livebox.movie.mapper.MovieMapper;
 import com.ptv.livebox.movie.service.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -71,6 +76,18 @@ public class MovieServiceImpl implements MovieService {
         List<MovieEntity> list = movieRepository.findAll();
 
         return movieMapper.map(list);
+    }
+
+    @Override
+    public List<Movie> search(MovieSearchRequest request) {
+        Page<MovieEntity> result = movieRepository.findAll(new MovieSpecifications(request),
+                PageRequest.of(0, request.getMaxRows(), defaultSort()));
+
+        return movieMapper.map(result.getContent());
+    }
+
+    private Sort defaultSort() {
+        return Sort.by(Sort.Order.asc("title"), Sort.Order.desc("genera"));
     }
 
     @Override

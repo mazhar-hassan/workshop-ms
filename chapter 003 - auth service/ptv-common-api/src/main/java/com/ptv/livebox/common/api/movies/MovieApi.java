@@ -1,8 +1,8 @@
 package com.ptv.livebox.common.api.movies;
 
 import com.github.fge.jsonpatch.JsonPatch;
+import com.ptv.livebox.common.api.movies.dtos.CreateMovie;
 import com.ptv.livebox.common.api.movies.dtos.Movie;
-import com.ptv.livebox.common.api.movies.dtos.MovieDetail;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,10 +16,10 @@ public interface MovieApi {
     Movie findById(@PathVariable("id") Integer id);
 
     @PostMapping
-    Movie create(@RequestBody MovieDetail movie);
+    Movie create(@RequestBody CreateMovie movie);
 
     @PutMapping("/{id}")
-    Movie edit(@PathVariable("id") Integer id, @RequestBody MovieDetail movie);
+    Movie edit(@PathVariable("id") Integer id, @RequestBody CreateMovie movie);
 
     @PatchMapping(path = "/{id}", consumes = "application/json-patch+json")
     Movie patch(@PathVariable("id") Integer id, @RequestBody JsonPatch patch);

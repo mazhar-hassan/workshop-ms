@@ -24,10 +24,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = Exception.class)
     protected ResponseEntity<ExceptionResponse> handleAllExceptions(Exception exception) {
+        exception.printStackTrace();
         if (exception instanceof ApplicationException) {
             return handleApplicationException((ApplicationException) exception);
         } else if (exception instanceof HttpMessageNotReadableException) {
-            return new ResponseEntity<>(ExceptionResponse.of(ApplicationException.ERROR_UNABLE_TO_MAP_OBJECT, "Parser error, please make sure JSON is properly formatted"), HttpStatus.INTERNAL_SERVER_ERROR);
+            return handleFormattingException((HttpMessageNotReadableException) exception);
         } /*else if (exception instanceof AccessDeniedException) {
             exception.printStackTrace();
             return new ResponseEntity<>(ExceptionResponse.of(ApplicationException.ERROR_ACCESS_FORBIDDEN, "Access is forbidden"), HttpStatus.FORBIDDEN);
@@ -36,6 +37,20 @@ public class GlobalExceptionHandler {
         //log.error("System exception occurred", exception);
         exception.printStackTrace();
         return new ResponseEntity<>(ExceptionResponse.of(ApplicationException.ERROR_UNKNOWN_ERROR, "Unknown error occured please contact site admin"), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private ResponseEntity<ExceptionResponse> handleFormattingException(HttpMessageNotReadableException exception) {
+        String message;
+
+        if (exception.getCause() instanceof com.fasterxml.jackson.databind.exc.InvalidFormatException) {
+            message = "Parsing error, Date format might not be correct";
+        } else {
+            message = "Parser error, please make sure JSON is properly formatted";
+        }
+
+        return new ResponseEntity<>(ExceptionResponse.of(ApplicationException.ERROR_UNABLE_TO_MAP_OBJECT,
+                message),
+                HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     protected ResponseEntity<ExceptionResponse> handleApplicationException(ApplicationException exception) {

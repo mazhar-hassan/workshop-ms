@@ -2,12 +2,16 @@ package com.ptv.livebox.movie.controller;
 
 import com.github.fge.jsonpatch.JsonPatch;
 import com.ptv.livebox.common.api.movies.MovieApi;
+import com.ptv.livebox.common.api.movies.dtos.CreateMovie;
 import com.ptv.livebox.common.api.movies.dtos.Movie;
 import com.ptv.livebox.common.api.movies.dtos.MovieDetail;
 import com.ptv.livebox.movie.dto.MovieSearchRequest;
 import com.ptv.livebox.movie.service.MovieService;
+import com.ptv.livebox.security.common.token.AccessToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -24,13 +28,14 @@ public class MovieController implements MovieApi {
         return movieService.findById(id);
     }
 
+
     @Override
-    public Movie create(MovieDetail movie) {
+    public Movie create(CreateMovie movie) {
         return movieService.create(movie);
     }
 
     @Override
-    public Movie edit(Integer id, MovieDetail movie) {
+    public Movie edit(Integer id, CreateMovie movie) {
         return movieService.edit(id, movie);
     }
 
@@ -50,7 +55,14 @@ public class MovieController implements MovieApi {
     }
 
     @GetMapping("/admin")
-    public String fakeAdminEndpoint() {
+    public String fakeAdminEndpoint(HttpServletRequest request) {
+
+
+        System.out.println("*************************************************************");
+        AccessToken token = (AccessToken) SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("Security username: " + token.getUser().getUsername());
+        System.out.println(request.getHeader("user"));
+
         return "Hello from Admin";
     }
 

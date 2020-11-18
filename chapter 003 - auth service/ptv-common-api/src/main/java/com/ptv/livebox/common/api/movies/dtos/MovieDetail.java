@@ -1,8 +1,10 @@
 package com.ptv.livebox.common.api.movies.dtos;
 
+import java.util.List;
+
 public class MovieDetail {
     private String title;
-    private MovieGenera genera;
+    private List<MovieGenera> generas;
     private String description;
 
     public String getTitle() {
@@ -13,12 +15,12 @@ public class MovieDetail {
         this.title = title;
     }
 
-    public MovieGenera getGenera() {
-        return genera;
+    public List<MovieGenera> getGeneras() {
+        return generas;
     }
 
-    public void setGenera(MovieGenera genera) {
-        this.genera = genera;
+    public void setGeneras(List<MovieGenera> generas) {
+        this.generas = generas;
     }
 
     public String getDescription() {

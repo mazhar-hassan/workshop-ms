@@ -1,8 +1,7 @@
 package com.ptv.livebox.movie.dao.entity;
 
-import com.ptv.livebox.common.api.movies.dtos.MovieGenera;
-
 import javax.persistence.*;
+import java.util.List;
 
 @Entity(name = "tv_movies")
 public class MovieEntity {
@@ -10,9 +9,11 @@ public class MovieEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String title;
-    @Enumerated(EnumType.STRING)
-    private MovieGenera genera;
+    @OneToMany(mappedBy = "movie", fetch = FetchType.EAGER)
+    private List<MovieGeneraEntity> generas;
     private String description;
+    @OneToOne(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private PublisherEntity publisher;
 
     public Integer getId() {
         return id;
@@ -30,12 +31,12 @@ public class MovieEntity {
         this.title = title;
     }
 
-    public MovieGenera getGenera() {
-        return genera;
+    public List<MovieGeneraEntity> getGeneras() {
+        return generas;
     }
 
-    public void setGenera(MovieGenera genera) {
-        this.genera = genera;
+    public void setGeneras(List<MovieGeneraEntity> generas) {
+        this.generas = generas;
     }
 
     public String getDescription() {
@@ -44,5 +45,13 @@ public class MovieEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public PublisherEntity getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(PublisherEntity publisher) {
+        this.publisher = publisher;
     }
 }

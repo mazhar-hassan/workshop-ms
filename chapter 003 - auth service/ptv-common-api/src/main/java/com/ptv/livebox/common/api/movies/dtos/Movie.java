@@ -4,7 +4,7 @@ import com.ptv.livebox.common.api.reviews.dtos.Review;
 
 import java.util.List;
 
-public class Movie extends MovieDetail {
+public class Movie extends CreateMovie {
     private Integer id;
     private List<Review> reviews;
 

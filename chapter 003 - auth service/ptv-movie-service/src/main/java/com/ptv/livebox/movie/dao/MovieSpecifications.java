@@ -21,7 +21,10 @@ public class MovieSpecifications implements Specification<MovieEntity> {
     }
 
     @Override
-    public Predicate toPredicate(Root<MovieEntity> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
+    public Predicate toPredicate(Root<MovieEntity> root,
+                                 CriteriaQuery<?> criteriaQuery,
+                                 CriteriaBuilder criteriaBuilder) {
+
         List<Predicate> predicates = new ArrayList<>();
 
         if (!ValueUtils.isEmpty(request.getTitle())) {
@@ -29,7 +32,8 @@ public class MovieSpecifications implements Specification<MovieEntity> {
         }
 
         if (null != request.getGenera()) {
-            predicates.add(criteriaBuilder.equal(root.get("genera"), request.getGenera()));
+            predicates.add(criteriaBuilder.equal(root.get("generas").get("genera"),
+                    request.getGenera()));
         }
         // all other filters ...
 

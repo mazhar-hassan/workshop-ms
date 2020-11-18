@@ -56,12 +56,12 @@ public class TestMovieController {
 
         String json = mapper.writeValueAsString(createByTitleSearch());
 
-        mockMvc.perform(post("/api/movies/search")
+        mockMvc.perform(secure(post("/api/movies/search"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("Test 1 Movie"));
+                .andExpect(jsonPath("$[0].title").value("Rambo II (JU)"));
 
     }
 
@@ -70,7 +70,7 @@ public class TestMovieController {
         CreateMovie dto = createMovieDTO();
         String json = mapper.writeValueAsString(createMovieDTO());
 
-        MvcResult response = mockMvc.perform(secure(post("/api/movies"))
+        MvcResult response = mockMvc.perform(secure(secure(post("/api/movies")))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andDo(print())
@@ -85,7 +85,11 @@ public class TestMovieController {
         assertEquals(dto.getDescription(), movie.getDescription());
         assertEquals(dto.getPublisher().getPublisher(), movie.getPublisher().getPublisher());
         assertEquals(dto.getPublisher().getCountry(), movie.getPublisher().getCountry());
-        assertEquals(dto.getPublisher().getPublishDate(), movie.getPublisher().getPublishDate());
+        //date comparison
+        assertThat(dto.getPublisher().getPublishDate().equals(movie.getPublisher().getPublishDate())).isTrue();
+
+        List<MovieGenera> generas = List.of(MovieGenera.ADVENTURE, MovieGenera.ACTION);
+        assertThat(generas).containsAll(movie.getGeneras());
     }
 
     private MockHttpServletRequestBuilder secure(MockHttpServletRequestBuilder builder) {
@@ -93,7 +97,7 @@ public class TestMovieController {
             return builder.header("user", mapper.writeValueAsString(createSecurityToken()));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
-            throw new RuntimeException("Exception occured while conversion");
+            throw new RuntimeException("Exception occurred while conversion");
         }
     }
 
@@ -136,7 +140,7 @@ public class TestMovieController {
 
     private MovieSearchRequest createByTitleSearch() {
         MovieSearchRequest request = new MovieSearchRequest();
-        request.setTitle("Test 1");
+        request.setTitle("Rambo");
 
         return request;
     }

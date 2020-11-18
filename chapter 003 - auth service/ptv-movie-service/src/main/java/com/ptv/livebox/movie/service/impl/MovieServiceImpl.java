@@ -7,8 +7,8 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.o4.microservices.common.exceptions.MissingRequiredFieldException;
 import com.o4.microservices.common.exceptions.RecordNotFoundException;
+import com.ptv.livebox.common.api.movies.dtos.CreateMovie;
 import com.ptv.livebox.common.api.movies.dtos.Movie;
-import com.ptv.livebox.common.api.movies.dtos.MovieDetail;
 import com.ptv.livebox.common.api.reviews.ReviewsApi;
 import com.ptv.livebox.movie.dao.MovieRepository;
 import com.ptv.livebox.movie.dao.MovieSpecifications;
@@ -47,16 +47,17 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public Movie create(MovieDetail movie) {
+    public Movie create(CreateMovie movie) {
         validate(movie);
         MovieEntity entity = movieMapper.map(movie);
+        entity.getPublisher().setMovie(entity);
         movieRepository.save(entity);
 
         return movieMapper.map(entity);
     }
 
     @Override
-    public Movie edit(Integer id, MovieDetail movie) {
+    public Movie edit(Integer id, CreateMovie movie) {
         validate(movie);
         MovieEntity existing = fetchMovie(id);
         movieMapper.mapOnTo(movie, existing);
@@ -87,7 +88,7 @@ public class MovieServiceImpl implements MovieService {
     }
 
     private Sort defaultSort() {
-        return Sort.by(Sort.Order.asc("title"), Sort.Order.desc("genera"));
+        return Sort.by(Sort.Order.asc("title"), Sort.Order.desc("generas"));
     }
 
     @Override
@@ -118,13 +119,17 @@ public class MovieServiceImpl implements MovieService {
                 .orElseThrow(() -> new RecordNotFoundException("Movie not found"));
     }
 
-    private void validate(MovieDetail movie) {
+    private void validate(CreateMovie movie) {
         if (movie == null) {
             throw new MissingRequiredFieldException("Required movie object is null");
         } else if (movie.getTitle() == null || movie.getTitle().isEmpty()) {
             throw new MissingRequiredFieldException("Movie title is missing");
-        } else if (movie.getGenera() == null) {
-            throw new MissingRequiredFieldException("Movie genera is missing");
+        } else if (movie.getPublisher() == null || null == movie.getPublisher().getPublisher()) {
+            throw new MissingRequiredFieldException("Publisher title cannot not be null");
         }
+
+        /*else if (movie.getGenera() == null) {
+            throw new MissingRequiredFieldException("Movie genera is missing");
+        }*/
     }
 }

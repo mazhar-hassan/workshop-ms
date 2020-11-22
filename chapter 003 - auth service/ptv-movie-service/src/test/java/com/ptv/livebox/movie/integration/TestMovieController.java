@@ -2,6 +2,7 @@ package com.ptv.livebox.movie.integration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.o4.microservices.common.exceptions.RecordNotFoundException;
 import com.ptv.livebox.common.api.movies.dtos.CreateMovie;
 import com.ptv.livebox.common.api.movies.dtos.Movie;
 import com.ptv.livebox.common.api.movies.dtos.MovieGenera;
@@ -9,11 +10,17 @@ import com.ptv.livebox.common.api.movies.dtos.Publisher;
 import com.ptv.livebox.common.api.reviews.ReviewsApi;
 import com.ptv.livebox.common.api.reviews.dtos.Review;
 import com.ptv.livebox.movie.common.utils.DateTimeUtils;
+import com.ptv.livebox.movie.dao.MovieGeneraRepository;
+import com.ptv.livebox.movie.dao.PublisherRepository;
+import com.ptv.livebox.movie.dao.entity.MovieGeneraEntity;
+import com.ptv.livebox.movie.dao.entity.PublisherEntity;
 import com.ptv.livebox.movie.dto.MovieSearchRequest;
 import com.ptv.livebox.security.common.data.AuthenticatedUser;
 import com.ptv.livebox.security.common.data.AutheticatedUserRole;
+import io.jsonwebtoken.lang.Collections;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -21,17 +28,18 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -48,6 +56,12 @@ public class TestMovieController {
 
     @LocalServerPort
     private Integer port;
+
+    @Autowired
+    MovieGeneraRepository generaRepository;
+
+    @Autowired
+    PublisherRepository publisherRepository;
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -67,8 +81,78 @@ public class TestMovieController {
 
     @Test
     public void testCreate() throws Exception {
-        CreateMovie dto = createMovieDTO();
-        String json = mapper.writeValueAsString(createMovieDTO());
+        Movie responseMovie = createMovie("Junit Movie");
+        assertNotNull(responseMovie);
+
+        //verify if response is actually saved in database
+        Movie dbMovie = fetchById(responseMovie.getId());
+        assertEquals(responseMovie.getDescription(), dbMovie.getDescription());
+        assertEquals(responseMovie.getPublisher().getPublisher(), dbMovie.getPublisher().getPublisher());
+        assertEquals(responseMovie.getPublisher().getCountry(), dbMovie.getPublisher().getCountry());
+        //date comparison
+        assertThat(responseMovie.getPublisher().getPublishDate().equals(dbMovie.getPublisher().getPublishDate())).isTrue();
+
+        List<MovieGenera> generas = List.of(MovieGenera.ADVENTURE, MovieGenera.ACTION);
+        assertTrue(!Collections.isEmpty(dbMovie.getGeneras()));
+        assertThat(generas).containsAll(dbMovie.getGeneras());
+    }
+
+    @Test
+    public void testUpdate() throws Exception {
+        Movie dto = createMovie("Junit Movie to Update");
+        dto.setTitle("Updated: Movie JUNIT");
+
+        dto.setGeneras(List.of(MovieGenera.WAR, MovieGenera.DOCUMENTARY, MovieGenera.ACTION));
+        dto.getPublisher().setCountry("UE");
+
+        MvcResult response = mockMvc.perform(secure(put("/api/movies/" + dto.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(dto)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value(dto.getTitle()))
+                .andReturn();
+
+        Movie responseMovie = mapper.readValue(response.getResponse().getContentAsString(), Movie.class);
+        assertEquals(dto.getPublisher().getCountry(), responseMovie.getPublisher().getCountry());
+
+        assertThat(dto.getGeneras()).containsAll(responseMovie.getGeneras());
+
+        //verify if response is actually saved in database
+        Movie dbMovie = fetchById(responseMovie.getId());
+        assertEquals(responseMovie.getDescription(), dbMovie.getDescription());
+        assertEquals(responseMovie.getPublisher().getPublisher(), dbMovie.getPublisher().getPublisher());
+        assertEquals(responseMovie.getPublisher().getCountry(), dbMovie.getPublisher().getCountry());
+        //date comparison
+        assertThat(responseMovie.getPublisher().getPublishDate().equals(dbMovie.getPublisher().getPublishDate())).isTrue();
+
+        assertTrue(!Collections.isEmpty(dbMovie.getGeneras()));
+        assertThat(dto.getGeneras()).containsAll(dbMovie.getGeneras());
+
+    }
+
+    @Test
+    public void testDelete() throws Exception {
+        Movie dto = createMovie("Junit Movie to Delete");
+
+        MvcResult response = mockMvc.perform(secure(delete("/api/movies/" + dto.getId())))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+
+        //verify if item is deleted
+        fetchById404(dto.getId());
+
+        //verify no generas
+        assertTrue(Collections.isEmpty(generaRepository.findAllByMovie_Id(dto.getId())));
+
+        //verify no Publisher
+        assertNull(publisherRepository.findByMovie_Id(dto.getId()));
+    }
+
+    private Movie createMovie(String title) throws Exception {
+        CreateMovie dto = createMovieDTO(title);
+        String json = mapper.writeValueAsString(dto);
 
         MvcResult response = mockMvc.perform(secure(secure(post("/api/movies")))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -90,6 +174,8 @@ public class TestMovieController {
 
         List<MovieGenera> generas = List.of(MovieGenera.ADVENTURE, MovieGenera.ACTION);
         assertThat(generas).containsAll(movie.getGeneras());
+
+        return movie;
     }
 
     private MockHttpServletRequestBuilder secure(MockHttpServletRequestBuilder builder) {
@@ -124,6 +210,25 @@ public class TestMovieController {
 
     }
 
+    private void fetchById404(Integer id) throws Exception {
+        fetchByIdMvcResult(id, status().is(404));
+    }
+
+    private MvcResult fetchByIdMvcResult(Integer id, ResultMatcher statusMatacher) throws Exception {
+        Mockito.when(reviewsApi.findReviewsByMovieId(id)).thenReturn(getMockingReviews());
+
+        return mockMvc.perform(secure(get("/api/movies/" + id)))
+                .andDo(print())
+                .andExpect(statusMatacher)
+                .andReturn();
+    }
+
+    private Movie fetchById(Integer id) throws Exception {
+        MvcResult response = fetchByIdMvcResult(id, status().isOk());
+
+        return mapper.readValue(response.getResponse().getContentAsString(), Movie.class);
+    }
+
     private AuthenticatedUser createSecurityToken() {
         AutheticatedUserRole role1 = new AutheticatedUserRole();
         role1.setId(1);
@@ -145,14 +250,14 @@ public class TestMovieController {
         return request;
     }
 
-    private CreateMovie createMovieDTO() {
+    private CreateMovie createMovieDTO(String title) {
         Publisher publisher = new Publisher();
         publisher.setPublishDate(new Date());
         publisher.setCountry("PK");
         publisher.setPublisher("Here is publisher");
 
         CreateMovie movie = new CreateMovie();
-        movie.setTitle("Junit Movie");
+        movie.setTitle(title);
         movie.setDescription("Here is description");
         movie.setPublisher(publisher);
 

@@ -8,6 +8,7 @@ import com.ptv.livebox.movie.dao.entity.MovieEntity;
 import com.ptv.livebox.movie.dao.entity.MovieGeneraEntity;
 import com.ptv.livebox.movie.dao.entity.PublisherEntity;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 import java.util.List;
@@ -20,6 +21,8 @@ public interface MovieMapper {
 
     MovieEntity map(CreateMovie movie);
 
+    @Mapping(target = "generas", ignore = true)
+    @Mapping(target = "publisher.movie", ignore = true)
     void mapOnTo(CreateMovie movie, @MappingTarget MovieEntity entity);
 
     List<Movie> map(List<MovieEntity> entities);

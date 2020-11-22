@@ -9,33 +9,43 @@ import com.o4.microservices.common.exceptions.MissingRequiredFieldException;
 import com.o4.microservices.common.exceptions.RecordNotFoundException;
 import com.ptv.livebox.common.api.movies.dtos.CreateMovie;
 import com.ptv.livebox.common.api.movies.dtos.Movie;
+import com.ptv.livebox.common.api.movies.dtos.MovieGenera;
 import com.ptv.livebox.common.api.reviews.ReviewsApi;
+import com.ptv.livebox.movie.common.GlobalExceptionHandler;
+import com.ptv.livebox.movie.dao.MovieGeneraRepository;
 import com.ptv.livebox.movie.dao.MovieRepository;
 import com.ptv.livebox.movie.dao.MovieSpecifications;
 import com.ptv.livebox.movie.dao.entity.MovieEntity;
+import com.ptv.livebox.movie.dao.entity.MovieGeneraEntity;
 import com.ptv.livebox.movie.dto.MovieSearchRequest;
 import com.ptv.livebox.movie.mapper.MovieMapper;
 import com.ptv.livebox.movie.service.MovieService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
+
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
 public class MovieServiceImpl implements MovieService {
+    private Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @Autowired
-    ReviewsApi reviewsApi;
+    private final ReviewsApi reviewsApi;
     private final MovieRepository movieRepository;
+    private final MovieGeneraRepository generaRepository;
     private final MovieMapper movieMapper;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public MovieServiceImpl(MovieRepository movieRepository, MovieMapper movieMapper) {
+    public MovieServiceImpl(ReviewsApi reviewsApi, MovieRepository movieRepository, MovieGeneraRepository generaRepository, MovieMapper movieMapper) {
+        this.reviewsApi = reviewsApi;
         this.movieRepository = movieRepository;
+        this.generaRepository = generaRepository;
         this.movieMapper = movieMapper;
     }
 
@@ -50,6 +60,9 @@ public class MovieServiceImpl implements MovieService {
     public Movie create(CreateMovie movie) {
         validate(movie);
         MovieEntity entity = movieMapper.map(movie);
+        entity.getGeneras().forEach(g -> {
+            g.setMovie(entity);
+        });
         entity.getPublisher().setMovie(entity);
         movieRepository.save(entity);
 
@@ -60,15 +73,39 @@ public class MovieServiceImpl implements MovieService {
     public Movie edit(Integer id, CreateMovie movie) {
         validate(movie);
         MovieEntity existing = fetchMovie(id);
+        List<MovieGeneraEntity> oldGeneras = existing.getGeneras();
         movieMapper.mapOnTo(movie, existing);
-        movieRepository.save(existing);
 
+        updateGeneras(existing, movie.getGeneras());
+        movieRepository.save(existing);
         return movieMapper.map(existing);
+    }
+
+    private void updateGeneras(MovieEntity existing, List<MovieGenera> newGeneras) {
+        Set<MovieGenera> hash = new HashSet<>(newGeneras);
+        List<MovieGeneraEntity> finalGeneras = new ArrayList<>();
+
+        for (MovieGeneraEntity genera : existing.getGeneras()) {
+            if (hash.contains(genera.getGenera())) {
+                finalGeneras.add(genera);
+                newGeneras.remove(genera);
+            } else {
+                logger.info("Genera {} will be deleted for {} ", genera.getGenera(), existing.getId());
+            }
+        }
+
+        for (MovieGenera genera: newGeneras) {
+            MovieGeneraEntity entity = movieMapper.toGeneraEntity(genera);
+            entity.setMovie(existing);
+            finalGeneras.add(entity);
+        }
+
+        existing.getGeneras().clear();
+        existing.getGeneras().addAll(finalGeneras);
     }
 
     @Override
     public void delete(Integer id) {
-
         movieRepository.delete(fetchMovie(id));
     }
 
@@ -126,10 +163,8 @@ public class MovieServiceImpl implements MovieService {
             throw new MissingRequiredFieldException("Movie title is missing");
         } else if (movie.getPublisher() == null || null == movie.getPublisher().getPublisher()) {
             throw new MissingRequiredFieldException("Publisher title cannot not be null");
-        }
-
-        /*else if (movie.getGenera() == null) {
+        } else if (isEmpty(movie.getGeneras())) {
             throw new MissingRequiredFieldException("Movie genera is missing");
-        }*/
+        }
     }
 }

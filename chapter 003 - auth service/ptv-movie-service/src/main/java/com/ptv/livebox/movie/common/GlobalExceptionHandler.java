@@ -3,6 +3,8 @@ package com.ptv.livebox.movie.common;
 import com.o4.microservices.common.exceptions.ApplicationException;
 import com.o4.microservices.common.exceptions.ExceptionResponse;
 import com.o4.microservices.common.exceptions.RecordNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -17,6 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    private Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(value = {NoHandlerFoundException.class, HttpRequestMethodNotSupportedException.class})
     public ResponseEntity<ExceptionResponse> handleError404(ServletException exception, HttpServletRequest request) {
         return new ResponseEntity<>(getServletExceptionResponse(exception, request), HttpStatus.NOT_FOUND);
@@ -29,13 +33,8 @@ public class GlobalExceptionHandler {
             return handleApplicationException((ApplicationException) exception);
         } else if (exception instanceof HttpMessageNotReadableException) {
             return handleFormattingException((HttpMessageNotReadableException) exception);
-        } /*else if (exception instanceof AccessDeniedException) {
-            exception.printStackTrace();
-            return new ResponseEntity<>(ExceptionResponse.of(ApplicationException.ERROR_ACCESS_FORBIDDEN, "Access is forbidden"), HttpStatus.FORBIDDEN);
-        }*/
-
-        //log.error("System exception occurred", exception);
-        exception.printStackTrace();
+        }
+        logger.error("Global exception handler", exception);
         return new ResponseEntity<>(ExceptionResponse.of(ApplicationException.ERROR_UNKNOWN_ERROR, "Unknown error occured please contact site admin"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

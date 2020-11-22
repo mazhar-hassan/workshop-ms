@@ -9,7 +9,7 @@ public class MovieEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String title;
-    @OneToMany(mappedBy = "movie", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<MovieGeneraEntity> generas;
     private String description;
     @OneToOne(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
